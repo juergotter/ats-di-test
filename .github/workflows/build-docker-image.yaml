@@ -1,4 +1,4 @@
-name: ats-di-test
+name: Build Docker Image
 
 on:
   workflow_dispatch:
@@ -6,16 +6,18 @@ on:
       docker_image_tag:
         description: Docker Image Tag
         required: true
-        default: '0.0.1'
+        default: '0.0.0'
         type: string
-      do_push:
-        description: Push
-        required: true
-        default: true
-        type: boolean
+# requires a Pro Subscription on hub.docker.com
+#      do_push:
+#        description: Push
+#        required: true
+#        default: true
+#        type: boolean
 
 env:
   DOCKER_IMAGE_NAME: jotools/ats-codesign
+  DOCKER_IMAGE_FILENAME: jotools-ats-codesign
 
 jobs:
   build:
@@ -51,7 +53,25 @@ jobs:
               -t ${{ env.DOCKER_IMAGE_NAME }}:${{ inputs.docker_image_tag }}-${{ matrix.arch }} \
               .
 
-      - name: Push Docker image
-        if: "${{ inputs.do_push == true }}"
+#      - name: Push Docker image
+#        if: "${{ inputs.do_push == true }}"
+#        run: |
+#          docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ inputs.docker_image_tag }}-${{ matrix.platform }}
+
+      - name: Save Docker image
         run: |
-          docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ inputs.docker_image_tag }}-${{ matrix.platform }}
+          docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ inputs.docker_image_tag }}-${{ matrix.arch }} | gzip > ${{ env.DOCKER_IMAGE_NAME }}-${{ matrix.arch }}.tgz
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: LibreSSL-macOS
+          retention-days: 2
+          path: |
+            ./${{ env.DOCKER_IMAGE_NAME }}-${{ matrix.arch }}.tgz
+          if-no-files-found: error
+
+      - name: Load Docker image
+        run: |
+          echo "Docker Image can be loaded with the following command:"
+          echo "docker load < {{ env.DOCKER_IMAGE_NAME }}-${{ matrix.arch }}.tgz"
