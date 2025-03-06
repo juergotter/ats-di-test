@@ -14,7 +14,7 @@ It installs the following components:
 
 ### Build Docker Image
 
-To build it locally as `mycompany/ats-codesign` on the Host where you intend to use it:
+To build it locally as `mycompany/ats-codesign` on the host machine where you intend to use it:
 
 - Intel 64bit:
   ```
