@@ -47,7 +47,7 @@ jobs:
           docker build \
               --no-cache \
               --platform ${{ matrix.platform }} \
-              --build-arg ARCH=${{ matrix.arch }}
+              --build-arg ARCH=${{ matrix.arch }} \
               -t ${{ env.DOCKER_IMAGE_NAME }}:${{ inputs.docker_image_tag }}-${{ matrix.arch }} \
               .
 
