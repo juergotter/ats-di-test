@@ -77,4 +77,4 @@ jobs:
       - name: Load Docker image
         run: |
           echo "Docker Image can be loaded with the following command:"
-          echo "docker load < {{ env.DOCKER_IMAGE_FILENAME }}-${{ matrix.arch }}.tgz"
+          echo "docker load < ${{ env.DOCKER_IMAGE_FILENAME }}-${{ matrix.arch }}.tgz"
