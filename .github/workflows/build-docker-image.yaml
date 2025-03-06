@@ -24,7 +24,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        arch: [amd64, arm64v8]
+        arch: [arm64v8]
+#        arch: [amd64, arm64v8]
         include:
           - arch: amd64
             platform: linux/amd64
@@ -65,7 +66,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: LibreSSL-macOS
+          name: DockerImage-${{ matrix.arch }}
           retention-days: 2
           path: |
             ./${{ env.DOCKER_IMAGE_FILENAME }}-${{ matrix.arch }}.tgz
