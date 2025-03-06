@@ -60,7 +60,7 @@ jobs:
 
       - name: Save Docker image
         run: |
-          docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ inputs.docker_image_tag }}-${{ matrix.arch }} | gzip > ${{ env.DOCKER_IMAGE_NAME }}-${{ matrix.arch }}.tgz
+          docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ inputs.docker_image_tag }}-${{ matrix.arch }} | gzip > ${{ env.DOCKER_IMAGE_FILENAME }}-${{ matrix.arch }}.tgz
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -68,10 +68,10 @@ jobs:
           name: LibreSSL-macOS
           retention-days: 2
           path: |
-            ./${{ env.DOCKER_IMAGE_NAME }}-${{ matrix.arch }}.tgz
+            ./${{ env.DOCKER_IMAGE_FILENAME }}-${{ matrix.arch }}.tgz
           if-no-files-found: error
 
       - name: Load Docker image
         run: |
           echo "Docker Image can be loaded with the following command:"
-          echo "docker load < {{ env.DOCKER_IMAGE_NAME }}-${{ matrix.arch }}.tgz"
+          echo "docker load < {{ env.DOCKER_IMAGE_FILENAME }}-${{ matrix.arch }}.tgz"
