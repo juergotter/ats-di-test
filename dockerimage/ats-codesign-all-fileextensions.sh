@@ -1,8 +1,11 @@
-#! /bin/sh
+#! /bin/bash
 #
-# ats-codesign.sh [FILE] [PATTERN] [@FILELIST]...
+# ats-codesign-all-fileextensions.sh [DIRECTORY] [FILEEXTENSION 1] [FILEEXTENSION 2]...
 
-CODESIGN_FILES="$*"
+CODESIGN_DIRECTORY=$1
+
+CODESIGN_FILEEXTENSIONS=("$@")
+CODESIGN_FILEEXTENSIONS=("${CODESIGN_FILEEXTENSIONS[@]:1}")
 
 echo "Setting up Environment"
 
@@ -58,16 +61,37 @@ fi
 
 echo "Checking Parameters"
 
-if [ -z "${CODESIGN_FILES}" ]; then
-    echo "Parameter [FILE] [PATTERN] [@FILELIST]... is empty"
+if [ -z "${CODESIGN_DIRECTORY}" ]; then
+    echo "Parameter [DIRECTORY] is empty"
+	ENV_CHECK=0
+fi
+if [ ${ENV_CHECK} -eq 1 ] && [ ! -d "${CODESIGN_DIRECTORY}" ]; then
+    echo "Directory '${CODESIGN_DIRECTORY}' not found"
+	ENV_CHECK=0
+fi
+
+if [ ${#CODESIGN_FILEEXTENSIONS[@]} -eq 0 ]; then
+    echo "Parameter [FILEEXTENSION 1] [FILEEXTENSION 2]... is empty"
+	ENV_CHECK=0
+fi
+
+FIND_SEPARATOR="\|"
+FIND_REGEX="$( printf "${FIND_SEPARATOR}%s" "${CODESIGN_FILEEXTENSIONS[@]}" )"
+FIND_REGEX="${FIND_REGEX:${#FIND_SEPARATOR}}" # remove leading separator
+
+readarray -d '' CODESIGN_FILES < <(find "${CODESIGN_DIRECTORY}" -iregex ".*\.\(${FIND_REGEX}\)" -print0)
+
+if [ ${#CODESIGN_FILES[@]} -lt 1 ]; then
+	SEPARATOREXTENSIONS=" "
+	JOINEXTENSIONS="$( printf "${SEPARATOREXTENSIONS}%s" "${CODESIGN_FILEEXTENSIONS[@]}" )"
+	JOINEXTENSIONS="${JOINEXTENSIONS:${#SEPARATOREXTENSIONS}}" # remove leading separator
+    echo "No matching files with extension(s) '${JOINEXTENSIONS}' found"
 	ENV_CHECK=0
 fi
 
 if [ ${ENV_CHECK} -ne 1 ]; then
 	echo ""
-	echo "Documentation: see 'Command Line Tool: [FILE] [PATTERN] [@FILELIST]...'"
-	echo "               https://ebourg.github.io/jsign/"
-	echo "Usage:         ats-codesign.sh [FILE] [PATTERN] [@FILELIST]..."
+	echo "Usage: ats-codesign-all-fileextensions.sh [DIRECTORY] [FILEEXTENSION 1] [FILEEXTENSION 2]..."
 	exit 10
 fi
 
@@ -87,18 +111,21 @@ fi
 
 echo "Codesign using jsing"
 
-jsign --storetype TRUSTEDSIGNING \
-		--keystore ${ACS_ENDPOINT} \
-		--storepass ${AZURE_ACCESS_TOKEN} \
-		--alias ${ACS_ACCOUNT_NAME}/${ACS_CERTIFICATE_PROFILE_NAME} \
-		${JSIGN_TSAURL} ${JSIGN_TSMODE} \
-		--replace \
-		${CODESIGN_FILES}
+for CODESIGN_FILE in "${CODESIGN_FILES[@]}"
+do
+	jsign	--storetype TRUSTEDSIGNING \
+			--keystore ${ACS_ENDPOINT} \
+			--storepass ${AZURE_ACCESS_TOKEN} \
+			--alias ${ACS_ACCOUNT_NAME}/${ACS_CERTIFICATE_PROFILE_NAME} \
+			${JSIGN_TSAURL} ${JSIGN_TSMODE} \
+			--replace \
+			"${CODESIGN_FILE}"
 
-retVal=$?
-if [ $retVal -ne 0 ]; then
-	echo "Error occurred during codesigning"
-	exit $retVal
-fi
+	retVal=$?
+	if [ $retVal -ne 0 ]; then
+		echo "ats-codesign [jsign]: Error occurred during codesigning file '${CODESIGN_FILE}'"
+		exit $retVal
+	fi
+done
 
 exit 0
