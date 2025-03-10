@@ -1,8 +1,8 @@
-#! /bin/sh
+#! /bin/bash
 #
 # ats-codesign.sh [FILE] [PATTERN] [@FILELIST]...
 
-CODESIGN_FILES="$*"
+JSIGN_PARAMETERS=("$@")
 
 echo "Setting up Environment"
 
@@ -58,8 +58,8 @@ fi
 
 echo "Checking Parameters"
 
-if [ -z "${CODESIGN_FILES}" ]; then
-    echo "Parameter [FILE] [PATTERN] [@FILELIST]... is empty"
+if [ ${#JSIGN_PARAMETERS[@]} -eq 0 ]; then
+    echo "Parameter(s) [FILE] [PATTERN] [@FILELIST]... are empty"
 	ENV_CHECK=0
 fi
 
@@ -85,7 +85,7 @@ if [ $retVal -ne 0 ]; then
 	exit $retVal
 fi
 
-echo "Codesign using jsing"
+echo "Codesign using jsign"
 
 jsign --storetype TRUSTEDSIGNING \
 		--keystore ${ACS_ENDPOINT} \
@@ -93,7 +93,7 @@ jsign --storetype TRUSTEDSIGNING \
 		--alias ${ACS_ACCOUNT_NAME}/${ACS_CERTIFICATE_PROFILE_NAME} \
 		${JSIGN_TSAURL} ${JSIGN_TSMODE} \
 		--replace \
-		${CODESIGN_FILES}
+		"$@"
 
 retVal=$?
 if [ $retVal -ne 0 ]; then

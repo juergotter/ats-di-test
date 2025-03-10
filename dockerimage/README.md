@@ -7,12 +7,10 @@ The Docker Image is based on Ubuntu and has the following components installed:
   Authenticode signing tool in Java
 - [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/)  
   Azure Command-Line Interface
-- Custom Shell Scripts used for Windows CodeSigning using Azure Trusted Signing
-  - [ats-codesign.sh](./ats-codesign.sh)  
-    Usage: `ats-codesign.sh [FILE] [PATTERN] [@FILELIST]...`  
-    Documentation: [jsign - Command Line Tool: `\[FILE\] \[PATTERN\] \[@FILELIST\]...`](https://ebourg.github.io/jsign/)
-  - [ats-codesign-all-fileextensions.sh](./ats-codesign-all-fileextensions.sh)  
-    Usage: `ats-codesign-all-fileextensions.sh [DIRECTORY] [FILEEXTENSION 1] [FILEEXTENSION 2]...`  
+- [ats-codesign.sh](./ats-codesign.sh)  
+  Custom Shell Script used for Windows CodeSigning using Azure Trusted Signing  
+  Usage: `ats-codesign.sh [FILE] [PATTERN] [@FILELIST]...`  
+  Documentation: [jsign - Command Line Tool: `[FILE] [PATTERN] [@FILELIST]...`](https://ebourg.github.io/jsign/)
 
 
 ### Build Docker Image
@@ -119,7 +117,7 @@ docker run \
     -v /local/path/to/build-folder:/data \
     -w /data \
     jotools/ats-codesign \
-    /bin/sh -c "ats-codesign-all-fileextensions.sh . exe dll"
+    /bin/sh -c "ats-codesign.sh \"./**/*.exe\" \"./**/*.dll\""
 ```
 
 The same example, but
@@ -134,7 +132,7 @@ docker run \
     -v /local/path/to/build-folder:/data \
     -w /data \
     jotools/ats-codesign \
-    /bin/sh -c "ats-codesign-all-fileextensions.sh . exe dll"
+    /bin/sh -c "ats-codesign.sh \"./**/*.exe\" \"./**/*.dll\""
 ```
 
 #### Example: Docker Container Shell
@@ -143,7 +141,7 @@ The following example will
 - use Environment Variables to setup the configuration
 - mount a folder on the host machine into `/data`
 - you then can manually sign files, e.g.:  
-  `ats-codesign-all-fileextensions.sh /data exe dll`  
+  `ats-codesign.sh "./**/*.exe" "./**/*.dll"`  
   `ats-codesign.sh myapp.exe mylib.dll`
 
 ```
@@ -165,7 +163,7 @@ The following example will
 - use the locally stored configuration files `acs.json` and `azure.json`
 - mount a folder on the host machine into `/data`
 - you then can manually sign files, e.g.:  
-  `ats-codesign-all-fileextensions.sh /data exe dll`  
+  `ats-codesign.sh "./**/*.exe" "./**/*.dll"`  
   `ats-codesign.sh myapp.exe mylib.dll`
 
 ```

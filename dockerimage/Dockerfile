@@ -28,12 +28,9 @@ RUN curl -L -O https://github.com/ebourg/jsign/releases/download/7.1/jsign_7.1_a
 
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
-#COPY CODESIGN SCRIPTS
+#COPY CODESIGN SCRIPT
 COPY ./ats-codesign.sh /usr/local/bin/
 RUN chmod 755 /usr/local/bin/ats-codesign.sh
-
-COPY ./ats-codesign-all-fileextensions.sh /usr/local/bin/
-RUN chmod 755 /usr/local/bin/ats-codesign-all-fileextensions.sh
 
 #PREPARE CONTAINER
 RUN mkdir -p /etc/ats-codesign
